@@ -7,17 +7,15 @@ import (
 )
 
 type InMemoryStorage struct {
-	shortToOriginal map[int64]string
-	originalToShort map[string]int64
-	count           int64
-	mu              sync.RWMutex
+	storage map[int64]string
+	count   int64
+	mu      sync.RWMutex
 }
 
 func NewInMemoryStorage() *InMemoryStorage {
 	return &InMemoryStorage{
-		shortToOriginal: make(map[int64]string),
-		originalToShort: make(map[string]int64),
-		count:           0,
+		storage: make(map[int64]string),
+		count:   0,
 	}
 }
 
@@ -25,19 +23,20 @@ func (s *InMemoryStorage) GetShortURL(ctx context.Context, originalURL string) (
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	code, ok := s.originalToShort[originalURL]
-	if !ok {
-		return -1, domain.ErrNotFound
+	for id, url := range s.storage {
+		if originalURL == url {
+			return id, nil
+		}
 	}
 
-	return code, nil
+	return -1, domain.ErrNotFound
 }
 
 func (s *InMemoryStorage) GetOriginalURL(ctx context.Context, id int64) (string, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	url, ok := s.shortToOriginal[id]
+	url, ok := s.storage[id]
 	if !ok {
 		return "", domain.ErrNotFound
 	}
@@ -49,8 +48,7 @@ func (s *InMemoryStorage) Save(ctx context.Context, id int64, originalURL string
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.shortToOriginal[id] = originalURL
-	s.originalToShort[originalURL] = id
+	s.storage[id] = originalURL
 	s.count++
 
 	return nil
