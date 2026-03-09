@@ -19,20 +19,12 @@ func (service *LinkService) CreateShortURL(ctx context.Context, originalURL stri
 		return "", err
 	}
 
-	if id, err := service.repository.GetShortURL(ctx, originalURL); err == nil {
-		return GenerateShortURL(id), nil
-	} else if err != nil && err != domain.ErrNotFound {
+	id, err := service.repository.GetOrCreateID(ctx, originalURL)
+	if err != nil {
 		return "", err
 	}
 
-	id := service.repository.GetCount(ctx)
-	shortURL := GenerateShortURL(id)
-
-	if err := service.repository.Save(ctx, id, originalURL); err != nil {
-		return "", err
-	}
-
-	return shortURL, nil
+	return GenerateShortURL(id), nil
 }
 
 func (service *LinkService) FindOriginalURL(ctx context.Context, shortURL string) (string, error) {
