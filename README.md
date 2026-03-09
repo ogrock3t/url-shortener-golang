@@ -222,7 +222,7 @@ Location: https://google.com
 
 ---
 
-### Получить оригинальный URL через API
+### Получить оригинальный URL
 
 ```bash
 curl http://localhost:8080/resolve/AAAAAAAAAA
