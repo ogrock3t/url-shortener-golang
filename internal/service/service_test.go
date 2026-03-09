@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	storage "github.com/ogrock3t/url-shortener-golang/internal/storage"
+	storage "github.com/ogrock3t/url-shortener-golang/internal/storage/in_memory"
 	"testing"
 	"unicode/utf8"
 )
